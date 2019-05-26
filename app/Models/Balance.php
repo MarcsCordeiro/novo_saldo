@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use App\User;
 
 class Balance extends Model
 {
@@ -80,6 +81,72 @@ class Balance extends Model
                 'message' => 'Falha ao retirar'
             ];
         }
+
+    }
+
+
+    public function transfer($value, User $info) : Array
+    {
+        if($this->amount < $value)
+        return [
+            'success' => false,
+            'message' => 'Saldo Insuficiente',
+        ];
+        
+    DB::beginTransaction();
+
+    /****************************************************
+     * Atualizar o próprio saldo
+     */
+
+    $totalBefore = $this->amount ? $this->amount : 0;   
+    $this->amount -= $value;
+    $transfer = $this->save();
+
+    $historic = auth()->user()->historics()->create([
+        'type'                  => 'T',
+        'amount'                => $value,
+        'total_before'          => $totalBefore,
+        'total_after'           => $this->amount,
+        'date'                  => date('Ymd'),
+        'user_id_transaction'   => $info->id,
+    ]);
+
+
+    /****************************************************
+     * Atualizar o saldo do recebedor
+     */
+    
+    $infoBalance = $info->balance()->firstOrCreate([]); 
+    $totalBeforeInfo = $infoBalance->amount ? $infoBalance->amount : 0;   
+    $infoBalance->amount += $value;
+    $transferInfo = $infoBalance->save();
+
+    $historicInfo = $info->historics()->create([
+        'type'                  => 'I',
+        'amount'                => $value,
+        'total_before'          => $totalBeforeInfo,
+        'total_after'           => $infoBalance->amount,
+        'date'                  => date('Ymd'),
+        'user_id_transaction'   => auth()->user()->id,
+    ]);
+
+    if($transfer && $historic && $transferInfo && $historicInfo){
+        DB::commit();
+
+        return[
+            'success' => true,
+            'message' => 'Sucesso ao transferir'
+        ];
+    }  else{
+        DB::rollback();
+        
+        return[
+            'success' => false,
+            'message' => 'Falha ao transferir'
+        ];
+    }
+
 
     }
 }
