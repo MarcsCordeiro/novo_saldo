@@ -5,19 +5,9 @@
 @section('content')
     <h1>Meu perfil</h1>
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
+    @include('admin.includes.alerts')
 
-    @if(session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <form action="{{ route('profile.update') }}" method="POST">
+    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
         {!! csrf_field() !!}
         <div class="form form-group">
         <div class="form-group">
