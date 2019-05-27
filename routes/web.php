@@ -2,6 +2,9 @@
 
 $this->group(['middleware' => ['auth'], 'namespace' => 'Admin', 'prefix' => 'admin'], function(){
 
+    Route::post('historic', 'BalanceController@searchHistoric')->name('historic.search');
+    Route::get('historic', 'BalanceController@historic')->name('admin.historic');
+
     Route::post('balance/confirm-transfer', 'BalanceController@confirmTranfer')->name('confirm.transfer');
     Route::post('balance/transfer', 'BalanceController@transferStore')->name('transfer.store');
     Route::get('balance/transfer', 'BalanceController@transfer')->name('balance.transfer');
