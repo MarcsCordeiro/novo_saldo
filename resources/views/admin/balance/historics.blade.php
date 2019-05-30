@@ -37,7 +37,7 @@
                     <th>Valor</th>
                     <th>Tipo</th>
                     <th>Data</th>
-                    <th>?Info?</th>
+                    <th>Beneficiario</th>
                 </tr>
             </thead>
             <tbody>
